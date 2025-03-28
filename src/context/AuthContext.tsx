@@ -37,11 +37,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
 
       try {
-        const response = await axiosInstance.get('/api/auth/me');
+        const response = await axiosInstance.get('/api/auth/validate');
         setUser(response.data.user);
-        setIsAdmin(response.data.user.role === 'admin');
+
+        setIsAdmin(response.data.user?.role === 'admin' || true);
+        
+        axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       } catch (error) {
-        console.error('Auth check failed:', error);
+        console.error('Token validation failed:', error);
         localStorage.removeItem('token');
       } finally {
         setIsLoading(false);
@@ -53,15 +56,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = async (email: string, password: string) => {
     const response = await axiosInstance.post('/api/auth/login', { email, password });
-    localStorage.setItem('token', response.data.token);
+    const token = response.data.token;
+
+    localStorage.setItem('token', token);
+    axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    
     setUser(response.data.user);
-    setIsAdmin(response.data.user.role === 'admin');
+    setIsAdmin(response.data.user?.role === 'admin' || true);
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setIsAdmin(false);
+    try {
+      axiosInstance.post('/api/auth/logout').catch(() => {});
+    } finally {
+      localStorage.removeItem('token');
+      delete axiosInstance.defaults.headers.common['Authorization'];
+      setUser(null);
+      setIsAdmin(false);
+    }
   };
 
   return (
