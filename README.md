@@ -1,54 +1,53 @@
-# User Administration System
+# User Administration System - Frontend
 
-A modern, comprehensive administration system for user management built with Next.js and Express.js. This system provides a secure platform for user registration, authentication, and administration with advanced activity tracking capabilities.
+A modern, responsive user management interface built with Next.js. This frontend application provides a secure platform for user registration, authentication, and administration with advanced activity tracking capabilities.
 
 ## Table of Contents
 - Features
 - Tech Stack
 - Getting Started
 - Project Structure
-- Authentication
-- User Management
-- Activity Tracking
-- API Documentation
+- Pages & Components
+- Authentication Flow
+- User Management Interface
+- Activity Visualization
 - Deployment
 - Contributing
 
 ## Features
 
-- **Authentication System**
-  - Secure registration and login
-  - JWT-based authentication
-  - Status tracking for blocked accounts
+- **Authentication Interface**
+  - Secure registration and login forms
+  - Status notifications for account status
   - Offline mode support
+  - Form validation
 
-- **User Management**
-  - View and search users
+- **User Management Dashboard**
+  - View and search users with pagination
   - Block/unblock user accounts
-  - Delete user accounts
+  - Delete user accounts with confirmation
   - Sort and filter functionality
 
-- **Activity Tracking**
-  - Track user login times
-  - Monitor user activity patterns
-  - Visual activity representation
-  - Last seen status
+- **Activity Visualization**
+  - Interactive activity charts
+  - Visual user status indicators
+  - Time-based activity patterns
+  - "Last seen" status display
 
 - **Responsive UI**
-  - Modern authentication forms
+  - Modern authentication forms with animations
   - Dark/light mode support
-  - Mobile-friendly design
-  - Interactive animations
+  - Mobile-friendly adaptive design
+  - Interactive loading states
 
-- **Security**
-  - Protected routes
-  - Token validation
-  - Session management
-  - Error handling
+- **Advanced Features**
+  - Error boundaries for fault tolerance
+  - Network status detection
+  - Optimistic UI updates
+  - Debounced search
 
 ## Tech Stack
 
-### Frontend
 - **Framework**: Next.js 14 (React)
 - **Language**: TypeScript
 - **Styling**: TailwindCSS
@@ -57,27 +56,21 @@ A modern, comprehensive administration system for user management built with Nex
 - **HTTP Client**: Axios
 - **Charts**: Recharts
 - **Theming**: next-themes
-
-### Backend
-- **Framework**: Express.js
-- **Language**: TypeScript
-- **Database**: PostgreSQL
-- **ORM**: Sequelize
-- **Authentication**: JWT
+- **Form Handling**: React Hook Form
 
 ## Getting Started
 
 ### Prerequisites
 - Node.js (>=18.x)
 - npm or yarn
-- PostgreSQL
+- Backend API (see separate backend repository)
 
-### Frontend Setup
+### Installation
 
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd user-administration/frontend
+cd user-administration-frontend
 ```
 
 2. Install dependencies:
@@ -92,7 +85,7 @@ yarn install
 cp .env.example .env.local
 ```
 
-4. Update the .env.local file with your API URL:
+4. Update the `.env.local` file with your API URL:
 ```
 NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
@@ -106,138 +99,97 @@ yarn dev
 
 The application will be available at [http://localhost:3000](http://localhost:3000).
 
-### Backend Setup
-
-1. Navigate to the backend directory:
-```bash
-cd ../backend
-```
-
-2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
-
-3. Configure environment variables:
-```bash
-cp .env.example .env
-```
-
-4. Update the `.env` file with your database connection details and JWT secret.
-
-5. Start the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-The API will be available at [http://localhost:4000](http://localhost:4000).
-
 ## Project Structure
 
-### Frontend
 ```
 frontend/
-├── public/             # Static assets
+├── public/                # Static assets
 ├── src/
-│   ├── app/            # Next.js application routes
-│   │   ├── admin/      # Admin panel
-│   │   ├── auth/       # Authentication pages
+│   ├── app/               # Next.js application routes
+│   │   ├── admin/         # Admin dashboard
+│   │   ├── auth/          # Authentication pages
 │   │   └── ...
-│   ├── components/     # Reusable components
-│   ├── config/         # Configuration (Axios setup, etc.)
-│   ├── context/        # React Context providers
-│   ├── hooks/          # Custom React hooks
-│   └── types/          # TypeScript type definitions
+│   ├── components/        # Reusable components
+│   │   ├── ActivityUtils/ # Activity tracking components
+│   │   ├── Notification/  # Toast notification system
+│   │   └── ...
+│   ├── config/            # Configuration (Axios setup, etc.)
+│   ├── context/           # React Context providers
+│   │   ├── AuthContext.tsx # Authentication context
+│   │   └── ...
+│   ├── hooks/             # Custom React hooks
+│   │   ├── useClickOutside.ts
+│   │   └── ...
+│   └── types/             # TypeScript type definitions
+│       ├── user.ts        # User interface definitions
+│       └── ...
 └── ...
 ```
 
-### Backend
-```
-backend/
-├── src/
-│   ├── config/         # Configuration files
-│   ├── controllers/    # Request handlers
-│   ├── middleware/     # Express middleware
-│   ├── models/         # Database models
-│   ├── routes/         # API routes
-│   └── types/          # TypeScript type definitions
-└── ...
-```
+## Pages & Components
 
-## Authentication
+### Main Pages
+- **Auth Page (`/auth`)**: Combined login/registration interface
+- **Admin Dashboard (`/admin`)**: User management interface 
 
-The application uses JWT (JSON Web Tokens) for authentication. The authentication flow is as follows:
+### Key Components
+- **AuthForm**: Handles both login and registration flows
+- **UserTable**: Displays user data with sorting and filtering
+- **ActivityBarChart**: Visualizes user activity patterns
+- **TimeDisplay**: Shows user status and last seen time
+- **Notification**: Toast notification system
+- **FilterDropdown**: Advanced filtering options for users
 
-1. User registers or logs in
-2. Server validates credentials and returns a JWT token
-3. Token is stored in localStorage and included in subsequent API requests
-4. Protected routes verify the token before allowing access
+## Authentication Flow
 
-### Auth Pages
+The frontend uses JWT for authentication with the following flow:
 
-- **Login**: Email and password authentication
-- **Registration**: Create new account with name, email, and password
-- **Logout**: Clear session and token
+1. User enters credentials in the login form or registers a new account
+2. Credentials are sent to the API endpoint
+3. On successful authentication, the JWT token is stored in localStorage
+4. AuthContext provider maintains the authentication state
+5. Protected routes redirect unauthenticated users to login
+6. Automatic token validation on app startup
 
-## User Management
+## User Management Interface
 
-The admin panel allows authorized users to:
+The admin dashboard provides several features:
 
-- View all registered users
-- Search users by name or email
-- Filter users by status (active/blocked)
-- Sort users by various attributes
-- Block/unblock users
-- Delete users from the system
+- **Table/Card Views**: Switch between table and card layouts
+- **Search**: Find users by name or email with debounced input
+- **Bulk Actions**: Select multiple users for actions
+- **Responsive Design**: Optimized for mobile and desktop
+- **Pagination**: Navigate through user records efficiently
 
-## Activity Tracking
+## Activity Visualization
 
-The system tracks user activity in several ways:
+User activity is presented through:
 
-- Records login times
-- Monitors session activity
-- Generates visual activity patterns
-- Displays "last seen" status for users
-
-Activity data is visualized through interactive charts in the admin panel.
-
-## API Documentation
-
-### Authentication Endpoints
-- `POST /api/auth/register`: Register new user
-- `POST /api/auth/login`: Login user
-- `POST /api/auth/logout`: Logout user (requires auth)
-- `POST /api/auth/update-activity`: Update user activity timestamp
-- `GET /api/auth/validate`: Validate JWT token
-- `GET /api/auth/ping`: Server status check with timezone info
-
-### User Management Endpoints
-- `GET /api/users`: Get all users (requires auth)
-- `GET /api/users/activity`: Get aggregated user activity data
-- `GET /api/users/activity/:userId`: Get specific user's activity pattern
-- `POST /api/users/block`: Block selected users
-- `POST /api/users/unblock`: Unblock selected users
-- `POST /api/users/delete`: Delete selected users
+- **Activity Charts**: Visualize patterns over time
+- **Status Indicators**: Show online/away/offline status
+- **Time Displays**: Show relative and absolute times
+- **Activity Metrics**: Display engagement statistics
 
 ## Deployment
 
-### Frontend
-The frontend can be deployed to Vercel with the following steps:
+### Vercel Deployment
+
+The frontend is optimized for deployment on Vercel:
 
 1. Connect your GitHub repository to Vercel
-2. Configure environment variables
+2. Configure environment variables:
+   - `NEXT_PUBLIC_API_URL`: Your backend API URL
 3. Deploy the application
 
-### Backend
-The backend can be deployed to any Node.js hosting service (Heroku, DigitalOcean, AWS, etc.). Make sure to:
+### Environment Setup
 
-1. Configure environment variables
-2. Set up a production database
-3. Configure CORS for your frontend domain
+For production deployment, ensure these environment variables are set:
+
+```
+NEXT_PUBLIC_API_URL=https://your-backend-api.com
+```
+
+Make sure your backend has CORS configured to allow requests from your frontend domain.
 
 ## Contributing
 
@@ -247,8 +199,3 @@ The backend can be deployed to any Node.js hosting service (Heroku, DigitalOcean
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
----
-
-This project was bootstrapped with [create-next-app](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-Similar code found with 2 license types
