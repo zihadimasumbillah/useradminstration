@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { FaSort, FaSortUp, FaSortDown, FaSearch, FaFilter, FaLock, FaUnlock, FaTrash, FaEllipsisV } from 'react-icons/fa';
 import { useAuth } from '@/context/AuthContext';
 import useClickOutside from '@/hooks/useClickOutside';
-import { User } from '@/types';
+import { User } from '@/types/user';
 import axiosInstance from '@/config/axios';
 import { isAxiosError } from 'axios';
 import { ActivityBarChart, TimeDisplay, formatDateString,formatRelativeTime  } from '@/components/ActivityUtils';
@@ -91,14 +91,14 @@ const MobileUserCard = ({ user, index, isSelected, onSelect }: MobileUserCardPro
     </div>
     
     <div className="flex flex-col space-y-1 text-sm text-gray-500 dark:text-gray-400 mt-2">
-      <div>Last active: {formatRelativeTime(user.last_activity_time)}</div>
-      <div className="text-xs">Last login: {formatDateString(user.last_login_time)}</div>
+    <div>Last active: {formatRelativeTime(user.last_activity_time || user.last_login_time)}</div>
+    <div className="text-xs">Last login: {formatDateString(user.last_login_time || "")}</div>
     </div>
 
     <div className="h-32 mt-4 border-t pt-3 border-gray-100 dark:border-gray-700 overflow-visible"> 
       <div style={{ height: 90, width: '100%' }}> 
         <ActivityBarChart 
-          pattern={user.activity_pattern}
+          pattern={user.activity_pattern || { pattern: {}, total: { minutes: 0, hours: 0, displayTime: "0m" } }}
           compact={false}
         />
       </div>
@@ -515,6 +515,12 @@ const TableHeader = ({ handleSelectAll, users, selectedUsers, sortBy, sortOrder,
 
 TableHeader.displayName = 'TableHeader';
 
+interface VirtualizedTableProps {
+  users: User[];
+  selectedUsers: string[];
+  handleSelect: (id: string) => void;
+}
+
 interface DesktopViewProps {
   users: User[];
   selectedUsers: string[];
@@ -525,7 +531,7 @@ interface DesktopViewProps {
   toggleSort: (column: string) => void;
 }
 
-const VirtualizedTable = React.memo(({ users, selectedUsers, handleSelect }) => {
+const VirtualizedTable = React.memo(({ users, selectedUsers, handleSelect }: VirtualizedTableProps) => {
   const visibleRows = useMemo(() => {
     return users.map((user) => (
       <div 
@@ -549,13 +555,13 @@ const VirtualizedTable = React.memo(({ users, selectedUsers, handleSelect }) => 
           <div className="text-sm text-gray-500 dark:text-gray-300">{user.email}</div>
         </div>
         <div className="px-4 w-1/4">
-          <TimeDisplay time={user.last_activity_time || user.last_login_time} showStatus={true} />
+          <TimeDisplay time={user.last_activity_time || user.last_login_time || ""} showStatus={true} />
           <span className="text-xs text-gray-400 block mt-1.5">
-            Last login: {formatDateString(user.last_login_time)}
+            Last login: {formatDateString(user.last_login_time || "")}
           </span>
           <div className="w-full h-20 mt-2 border-t pt-2 border-gray-100 dark:border-gray-700 overflow-visible">
             <ActivityBarChart 
-              pattern={user.activity_pattern} 
+              pattern={user.activity_pattern || { pattern: {}, total: { minutes: 0, hours: 0, displayTime: "0m" } }} 
               compact={true}
             />
           </div>
@@ -749,13 +755,22 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: {
 
 Pagination.displayName = 'Pagination';
 
-class ErrorBoundary extends React.Component {
-  constructor(props) {
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+}
+
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false, error: null };
   }
 
-  static getDerivedStateFromError(error) {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error };
   }
 
@@ -1005,16 +1020,16 @@ export default function AdminPage() {
     const currentData = [...users];
 
     const localSorted = [...users].sort((a, b) => {
-      const aVal = column in a ? a[column] || '' : '';
-      const bVal = column in b ? b[column] || '' : '';
+      const aVal = column in a ? a[column as keyof User] || '' : '';
+      const bVal = column in b ? b[column as keyof User] || '' : '';
       
       if (column === 'name' || column === 'status' || column === 'email') {
         return newOrder === 'ASC' 
           ? String(aVal).localeCompare(String(bVal))
           : String(bVal).localeCompare(String(aVal));
       } else {
-        const dateA = aVal ? new Date(aVal).getTime() : 0;
-        const dateB = bVal ? new Date(bVal).getTime() : 0;
+        const dateA = aVal ? new Date(String(aVal)).getTime() : 0;
+        const dateB = bVal ? new Date(String(bVal)).getTime() : 0;
         return newOrder === 'ASC' ? dateA - dateB : dateB - dateA;
       }
     });

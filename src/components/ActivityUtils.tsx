@@ -18,7 +18,7 @@ interface UserWithActivity {
   activity_pattern?: ActivityPattern;
 }
 
-export const formatDateString = (dateString: string): string => {
+export const formatDateString = (dateString?: string | null): string => {
   if (!dateString) return 'N/A';
   
   const date = new Date(dateString);
@@ -44,7 +44,7 @@ const getUserStatus = (time?: string | null): 'online' | 'away' | 'offline' => {
   return 'offline';
 };
 
-export const formatRelativeTime = (timeString?: string): string => {
+export const formatRelativeTime = (timeString?: string | null): string => {
   if (!timeString) return 'Never';
   
   const date = new Date(timeString);
@@ -64,12 +64,13 @@ const formatActivityTime = (minutes: number): string => {
   return hours > 0 ? `${hours}h ${remainingMinutes}m` : `${remainingMinutes}m`;
 };
 
-export const TimeDisplay = ({ time, showStatus = true }: { time: string, showStatus?: boolean }) => {
-  const status = showStatus ? getUserStatus(time) : null;
-  
+export const TimeDisplay = ({ time, showStatus = true }: { time?: string | null, showStatus?: boolean }) => {
   const timeRef = React.useRef<HTMLSpanElement>(null);
   const [tooltipPosition, setTooltipPosition] = React.useState({ top: 0, left: 0 });
   const [showTooltip, setShowTooltip] = React.useState(false);
+  
+  if (!time) return <span className="text-gray-400">No activity</span>;
+  const status = showStatus ? getUserStatus(time) : null;
   
   const handleMouseEnter = () => {
     if (timeRef.current) {
@@ -154,7 +155,7 @@ export const ActivityBarChart = ({
   compact?: boolean;
   className?: string;
 }) => {
-  if (!pattern?.pattern) return <div className="text-xs text-gray-400">No activity data</div>;
+  if (!pattern || !pattern.pattern) return <div className="text-xs text-gray-400">No activity data</div>;
 
   const patternData = typeof pattern.pattern === 'object' && !Array.isArray(pattern.pattern) 
     ? Object.keys(pattern.pattern).map(key => pattern.pattern[key])

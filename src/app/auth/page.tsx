@@ -81,7 +81,7 @@ function AuthForm() {
         } else if (axios.isAxiosError(error) && error.response?.status === 401) {
           setError('Invalid email or password. Please try again.');
         } else {
-          setError(error.response?.data?.message || 'Login failed. Please try again.');
+          setError(axios.isAxiosError(error) ? error.response?.data?.message || 'Login failed. Please try again.' : 'Login failed. Please try again.');
         }
       }
     } finally {
@@ -124,7 +124,7 @@ function AuthForm() {
       } catch (error: unknown) {
         console.log('Registration error:', error);
         
-        if (error.__blockedAccount) {
+        if (typeof error === 'object' && error !== null && '__blockedAccount' in error) {
           setError('This account has been blocked. Please contact the administrator.');
           
           const form = document.querySelector('form');
@@ -154,7 +154,7 @@ function AuthForm() {
           }
         } else {
           // Better error message
-          setError('Unable to register account. Please check your connection and try again.');
+          setError(axios.isAxiosError(error) ? error.response?.data?.message || 'Unable to register account. Please check your connection and try again.' : 'Unable to register account. Please check your connection and try again.');
         }
       }
     } finally {

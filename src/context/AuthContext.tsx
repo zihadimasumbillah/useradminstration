@@ -5,8 +5,9 @@ import axiosInstance from '@/config/axios';
 import { User } from '@/types/user';
 
 interface AuthContextType {
+  isLoading: boolean;
+  loading: boolean; 
   user: User | null;
-  loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
   isAdmin: boolean;
@@ -24,14 +25,14 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        setLoading(false);
+        setIsLoading(false);
         return;
       }
 
@@ -43,7 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.error('Auth check failed:', error);
         localStorage.removeItem('token');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -64,7 +65,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, isAdmin }}>
+    <AuthContext.Provider value={{ user, isLoading, loading: isLoading, login, logout, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );

@@ -15,6 +15,15 @@ interface NotificationProps {
   showProgress?: boolean;
 }
 
+const positionStyles = {
+  'top-right': 'top-4 right-4',
+  'top-left': 'top-4 left-4',
+  'bottom-right': 'bottom-4 right-4',
+  'bottom-left': 'bottom-4 left-4',
+  'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
+  'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2',
+};
+
 export const Notification: React.FC<NotificationProps> = ({
   type,
   message,
@@ -25,6 +34,13 @@ export const Notification: React.FC<NotificationProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [progress, setProgress] = useState(100);
+  
+  const handleClose = React.useCallback(() => {
+    setIsVisible(false);
+    if (onClose) {
+      onClose();
+    }
+  }, [onClose]);
   
   useEffect(() => {
     if (duration <= 0) return;
@@ -49,22 +65,6 @@ export const Notification: React.FC<NotificationProps> = ({
     
     return () => clearTimeout(timeout);
   }, [duration, showProgress, handleClose]);
-  
-  const handleClose = React.useCallback(() => {
-    setIsVisible(false);
-    setTimeout(() => {
-      onClose?.();
-    }, 300); 
-  }, [onClose]);
-  
-  const positionStyles = {
-    'top-right': 'top-4 right-4',
-    'top-left': 'top-4 left-4',
-    'bottom-right': 'bottom-4 right-4',
-    'bottom-left': 'bottom-4 left-4',
-    'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
-    'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2',
-  };
   
   const icons = {
     success: <FaCheckCircle className="text-green-500 h-5 w-5" />,
