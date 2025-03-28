@@ -5,7 +5,7 @@
   --foreground: #171717;
 }
 
-@theme inline {
+:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
@@ -23,4 +23,74 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+.animate-shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+.blocked-account-error {
+  border-left: 4px solid #f44336;
+  background-color: #ffebee;
+  color: #b71c1c;
+  font-weight: 500;
+}
+
+/* Activity and Last Seen Styles */
+.activity-tooltip {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 10;
+  pointer-events: none;
+  white-space: nowrap;
+  transition: opacity 0.2s;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.status-online {
+  background-color: #10B981;
+}
+
+.status-away {
+  background-color: #F59E0B;
+}
+
+.status-offline {
+  background-color: #9CA3AF;
+}
+
+/* Add nice transition for the bar chart */
+.recharts-bar-rectangle {
+  transition: opacity 0.3s;
+}
+
+.recharts-bar-rectangle:hover {
+  opacity: 0.8;
+}
+
+@layer components {
+  .mobile-user-card {
+    @apply bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 space-y-3;
+  }
+  
+  .activity-chart-wrapper {
+    @apply h-16 w-full bg-gray-50 dark:bg-gray-900 rounded overflow-hidden;
+  }
 }
